@@ -1,0 +1,37 @@
+
+## Funcionalidades feitas
+- **Cadastro de Itens**
+- **Cadastro de Usuários**
+- **Listagem de Itens**
+- **Remover Itens**
+- **Listagem de Usuários**
+
+## Funcionalidades em desenvolvimento
+- **Empréstimos e Devoluções**: Controle empréstimos de itens para usuários
+- **Busca e Listagem Avançada**: Liste e busque itens e usuários cadastrados.
+- **Relatórios e Estatísticas**: Gere relatórios sobre o uso do sistema
+- **Edição de Dados**: Edite informações de itens e usuários.
+- **Exportação/Importação**: Salve e recupere dados do sistema.
+- **Auditoria e Histórico**: Acompanhe alterações e operações realizadas
+
+## Arquitetura
+
+- **Tipos.hs**: Define os tipos principais (`Usuario`, `Item`, `DB`, `TipoMidia`).
+- **BancoDeDados.hs**: Gerencia o banco de dados em memória.
+- **Itens.hs**: Funções para cadastro, validação e remoção de itens.
+- **Users.hs**: Funções para cadastro e validação de usuários.
+- **Listagem.hs**: Funções para imprimir a listagem de itens e usuários.
+- **Menus.hs**: Implementa menus interativos e navegação entre funcionalidades.
+- **Emprestimos.hs**: Gerencia empréstimos de itens (em desenvolvimento).
+- **main.hs**: Ponto de entrada do sistema, inicializa o banco de dados e menus.
+
+## Como Executar
+
+1. Abra o terminal e execute o GHCi:
+   ```
+   ghci main.hs
+   ```
+2. No GHCi, execute:
+   ```
+   main
+   ```
