@@ -5,6 +5,7 @@ import BancoDeDados
 import Users
 import Emprestimos
 import Listagem 
+import Control.Monad.RWS (MonadState(put))
 
 
 
@@ -35,8 +36,8 @@ menu db = do
             novoDb <- menuUsers db
             menu novoDb
         "3" -> do
-            putStrLn "\n-> Indo para o submenu de cadastro..."
-            menu db
+            novoDb <- menuEmprestimos db
+            menu novoDb
         "4" -> do
             putStrLn "\n-> Indo para o submenu de cadastro..."
             menu db
@@ -184,3 +185,56 @@ menuItens db = do
         _ -> do
             putStrLn "\nOpcao invalida."
             menuItens db
+
+fazerEmprestimo :: String -> String -> String -> DB -> IO DB
+fazerEmprestimo codItem matriculaUser dataRetirada db = 
+    case registrarEmprestimo codItem matriculaUser dataRetirada db of
+        Left aviso -> do
+            putStrLn $ "\n" ++ aviso
+            resposta <- getLine
+                               
+            if resposta == "S" || resposta == "s" then do
+                -- atualizamos a lista de esperas
+                let novasEsperas = adicionarEspera codItem matriculaUser (esperas db)
+                let dbComEspera = db { esperas = novasEsperas }
+                putStrLn "\nVoce foi adicionado a lista de espera com sucesso!"
+                menuEmprestimos dbComEspera
+            else do
+                putStrLn "\nOperacao cancelada."
+                menuEmprestimos db
+                                    
+            -- sucesso no empréstimo
+        Right novoDb -> do
+            putStrLn "\nEmprestimo realizado com sucesso!"
+            menuEmprestimos novoDb
+
+menuEmprestimos :: DB -> IO DB
+menuEmprestimos db = do
+    putStrLn "\n====================="
+    putStrLn "  Empréstimos e Devoluções  "
+    putStrLn "====================="
+    putStrLn "1 - Registrar empréstimos"
+    putStrLn "2 - Registrar devolução"
+    putStrLn "3 - Visualizar empréstimos ativos"
+    putStrLn "4 - Renovar empréstimo"
+    putStrLn "5 - Empréstimos/devoluções em lote"
+    putStrLn "6 - Voltar ao menu principal"
+    putStr "Digite uma opcao: "
+    opcao <- getLine
+
+    case opcao of
+        "1" -> do
+            codItem <- prompt "Codigo do Item: "
+            matriculaUser <- prompt "Matricula do Usuario: "
+            dataRetirada <- prompt "Data de Retirada (ex: 2026-03-16): "
+
+            case verificarItemParaEmprestimo codItem matriculaUser db of
+                Left erro -> do
+                    putStrLn $ "\n" ++ erro
+                    menuEmprestimos db
+                Right _ -> do                    
+                    dbNovo <- fazerEmprestimo codItem matriculaUser dataRetirada db
+                    menuEmprestimos dbNovo
+        "6" -> do
+            return db
+                        
