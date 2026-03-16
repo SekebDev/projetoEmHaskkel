@@ -6,6 +6,7 @@ import Tipos
 clearDB :: DB
 clearDB = DB {
     usuarios = [],
-    itens = []
+    itens = [],
+    emprestimos = [],
+    esperas = []
 }
-
