@@ -7,7 +7,8 @@ import Emprestimos
 import Listagem 
 import Control.Monad.RWS (MonadState(put))
 import Busca
-
+import System.Directory (doesFileExist)
+import Data.List (isInfixOf)
 
 
 -- função para exibir o menu principal
@@ -54,14 +55,8 @@ menu db = do
         "8" -> do
             putStrLn "\n-> Indo para o submenu de cadastro..."
             menu db
-        "9" -> do
-            putStrLn "\n-> Indo para o submenu de cadastro..."
-            menu db
-
-            -- sai do loop  
         "0" -> do
-
-            putStrLn "\nAté a próxima."
+            salvarSistema db
         _   -> do
             putStrLn "\nOpção inválida! Tente novamente."
             menu db
@@ -189,26 +184,27 @@ menuItens db = do
             menuItens db
 
 fazerEmprestimo :: String -> String -> String -> DB -> IO DB
-fazerEmprestimo codItem matriculaUser dataRetirada db = 
-    case registrarEmprestimo codItem matriculaUser dataRetirada db of
+fazerEmprestimo codItem matriculaUser dataRetirada db = do
+    case registrarEmprestimo codItem matriculaUser dataRetirada db of 
         Left aviso -> do
             putStrLn $ "\n" ++ aviso
-            resposta <- getLine
-                               
-            if resposta == "S" || resposta == "s" then do
-                -- atualizamos a lista de esperas
-                let novasEsperas = adicionarEspera codItem matriculaUser (esperas db)
-                let dbComEspera = db { esperas = novasEsperas }
-                putStrLn "\nVoce foi adicionado a lista de espera com sucesso!"
-                menuEmprestimos dbComEspera
+            if "ja esta emprestado" `isInfixOf` aviso && not ("JA ESTA" `isInfixOf` aviso) then do
+                resposta <- getLine
+                if resposta == "S" || resposta == "s" then do
+                    let novasEsperas = adicionarEspera codItem matriculaUser (esperas db)
+                    let dbComEspera = db { esperas = novasEsperas }
+                    putStrLn "\nVoce foi adicionado a lista de espera com sucesso!"
+                    return dbComEspera 
+                else do
+                    putStrLn "\nOperacao cancelada."
+                    return db 
             else do
-                putStrLn "\nOperacao cancelada."
-                menuEmprestimos db
-                                    
-            -- sucesso no empréstimo
+
+                return db 
+                
         Right novoDb -> do
             putStrLn "\nEmprestimo realizado com sucesso!"
-            menuEmprestimos novoDb
+            return novoDb -- Devolve o DB novo com o empréstimo registrado
 
 menuEmprestimos :: DB -> IO DB
 menuEmprestimos db = do
@@ -233,10 +229,57 @@ menuEmprestimos db = do
             case verificarItemParaEmprestimo codItem matriculaUser db of
                 Left erro -> do
                     putStrLn $ "\n" ++ erro
-                    menuEmprestimos db
+                    menuEmprestimos db -- Volta com erro
                 Right _ -> do                    
                     dbNovo <- fazerEmprestimo codItem matriculaUser dataRetirada db
-                    menuEmprestimos dbNovo
+                    menuEmprestimos dbNovo -- Volta para o menu com o banco atualizado!
+        "2" -> do
+            codItem <- prompt "Codigo do item a ser devolvido: "
+            dataDev <- prompt "Data da devolucao (ex: 2026-03-16): "
+            
+            case registrarDevolucao codItem dataDev db of
+                Left erro -> do
+                    putStrLn $ "\n" ++ erro
+                    menuEmprestimos db
+                Right novoDb -> do
+                    putStrLn "\nDevolucao registrada com sucesso!"
+                    menuEmprestimos novoDb
+
+        "3" -> do
+            putStrLn "\n=== Emprestimos Ativos ==="
+            let ativos = pegarEmprestimosAtivos (emprestimos db)
+            
+            if null ativos
+            then putStrLn "Nenhum item emprestado no momento."
+            else imprimirEmprestimos ativos
+            
+            menuEmprestimos db
+        "4" -> do
+            codItem <- prompt "Codigo do item a ser renovado: "
+            novaData <- prompt "Nova data de devolucao (ex: 2026-04-16): "
+            
+            case renovarEmprestimo codItem novaData db of
+                Left erro -> do
+                    putStrLn $ "\n" ++ erro
+                    menuEmprestimos db
+                Right novoDb -> do
+                    putStrLn "\nEmprestimo renovado com sucesso!"
+                    menuEmprestimos novoDb
+        "5" -> do
+            putStrLn "\n=== Emprestimo em Lote ==="
+            matUser <- prompt "Matricula do Usuario: "
+            dataAtual <- prompt "Data de Retirada (ex: 2026-03-17): "
+            
+            putStrLn "Digite os codigos dos itens separados por espaco (ex: 101 102 103): "
+            entradaCodigos <- getLine
+            
+            -- Transforma a string "101 102" na lista ["101", "102"]
+            let listaDeCodigos = words entradaCodigos
+            
+            novoDb <- emprestimoEmLote listaDeCodigos matUser dataAtual db
+            
+            menuEmprestimos novoDb
+
         "6" -> do
             return db
 
