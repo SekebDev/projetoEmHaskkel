@@ -1,10 +1,11 @@
 module Main where
 import Itens
-import BancoDeDados
+import BancoDeDados (carregarSistema)
 import Menus
 import Users
 import Emprestimos
 
 main :: IO ()
 main = do 
-    menu clearDB
+    dbInicial <- carregarSistema
+    menu dbInicial

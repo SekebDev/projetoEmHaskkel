@@ -5,11 +5,11 @@ data Usuario = Usuario {
     nome      :: String,
     matricula :: String,
     email     :: String
-} deriving (Show, Eq)
+} deriving (Show, Eq, Read)
 
 
 -- tipos de mídia disponíveis
-data TipoMidia = Livro | Filme | Jogo deriving (Show, Eq)
+data TipoMidia = Livro | Filme | Jogo deriving (Show, Eq, Read)
 
 -- tipo para Livros, Filmes e Jogos
 data Item = Item {
@@ -18,12 +18,12 @@ data Item = Item {
     ano         :: Int,
     codigoUnico :: String,
     tipoMidia   :: TipoMidia
-} deriving (Show, Eq)
+} deriving (Show, Eq, Read)
 
 
 -- status do empréstimo
 data StatusEmprestimo = Emprestado | Devolvido | Atrasado
-    deriving (Show, Eq)
+    deriving (Show, Eq, Read)
 
 -- tipo para os Empréstimos
 data Emprestimo = Emprestimo {
@@ -32,13 +32,13 @@ data Emprestimo = Emprestimo {
     dataRetirada               :: String,
     dataDevolucao              :: String,
     status                     :: StatusEmprestimo
-} deriving (Show, Eq)
+} deriving (Show, Eq, Read)
 
 -- tipo para gerenciar a fila de espera de um item
 data FilaEspera = FilaEspera {
     codItemFila  :: String,
     usuariosFila :: [String] -- matrículas dos usuários na fila
-} deriving (Show, Eq)
+} deriving (Show, Eq, Read)
 
 -- tipo para o Banco de Dados
 data DB = DB {
@@ -46,4 +46,4 @@ data DB = DB {
     itens    :: [Item],
     emprestimos :: [Emprestimo],
     esperas     :: [FilaEspera]
-} deriving (Show)
+} deriving (Show, Read)

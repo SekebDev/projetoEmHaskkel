@@ -14,3 +14,11 @@ listarItens [] = putStrLn "-----------------------------------\n"
 listarItens (x:xs) = do
     putStrLn $ "Nome: " ++ titulo x ++ " | Autor: " ++ autor x ++ " | Ano: " ++ show (ano x) ++ " | Código Único: " ++ codigoUnico x ++ " | Tipo de Mídia: " ++ show (tipoMidia x)
     listarItens xs
+
+
+-- listar empréstimos ativos
+imprimirEmprestimos :: [Emprestimo] -> IO ()
+imprimirEmprestimos [] = putStrLn "-----------------------------------\n"
+imprimirEmprestimos (x:xs) = do
+    putStrLn $ "Código: " ++ codItemEmprestimo x ++ " | Usuário: " ++ matriculaUsuarioEmprestimo x ++ " | Data: " ++ dataRetirada x
+    imprimirEmprestimos xs
