@@ -1,5 +1,7 @@
-
-#Funcionalidades feitas
+## SISTEMA DE GERENCIAMENTO DE INVENTARIO DE MIDIAS
+ Um sistema desenvolvido para gerenciamento de livros,filmes e jogos, que faz emprestimos, devoluçoes e gerenciamento de usuarios cadastrados e dos materias no estoque.
+ 
+## Funcionalidades feitas
 - **Cadastro de Itens**
 - **Cadastro de Usuários**
 - **Listagem de Itens**
@@ -7,18 +9,14 @@
 - **Listagem de Usuários**
 - **logs e arquivamento de logs**
 - **registrar emprestimos**
+- **Empréstimos e Devoluções**
 - **Busca e Listagem Avançada**
-
-
-## Funcionalidades em desenvolvimento
-- **Empréstimos e Devoluções**: Controle empréstimos de itens para usuários
-- **Relatórios e Estatísticas**: Gere relatórios sobre o uso do sistema
-- **Edição de Dados**: Edite informações de itens e usuários.
-- **Exportação/Importação**: Salve e recupere dados do sistema.
-- **Auditoria e Histórico**: Acompanhe alterações e operações realizadas.
+- **Relatórios e Estatísticas**
+- **Edição de Dados**
+- **Exportação/Importação**
+- **Auditoria e Histórico**
 
 ## Arquitetura
-
 - **Tipos.hs**: Define os tipos principais (`Usuario`, `Item`, `DB`, `TipoMidia`).
 - **BancoDeDados.hs**: Gerencia o banco de dados em memória.
 - **Itens.hs**: Funções para cadastro, validação e remoção de itens.
@@ -27,9 +25,10 @@
 - **Menus.hs**: Implementa menus interativos e navegação entre funcionalidades.
 - **Emprestimos.hs**: Gerencia empréstimos de itens (em desenvolvimento).
 - **main.hs**: Ponto de entrada do sistema, inicializa o banco de dados e menus.
+- **busca.hs**: Mecanismos de busca de usuarios e mídias
+- **logs.hs**: Define os eventos que ocorreram
 
 ## Como Executar
-
 1. Abra o terminal e execute o GHCi:
    ```
    ghci main.hs
@@ -38,3 +37,16 @@
    ```
    main
    ```
+## Tecnologias utilizadas
+- Haskell
+- GHC (Glasgow Haskell Compiler)
+- GHCi
+- Cabal
+
+## Autores
+Felipe Almeida Cardoso 
+João Arthur Rosendo Silva 
+Matheus Emiliano Souza 
+Pedro Luyd Ribeiro Gonçalves 
+Vitor Cesar Bento Beanucci Toffoli 
+
