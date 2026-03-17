@@ -7,11 +7,11 @@
 - **Listagem de Usuários**
 - **logs e arquivamento de logs**
 - **registrar emprestimos**
+- **Busca e Listagem Avançada**
 
 
 ## Funcionalidades em desenvolvimento
 - **Empréstimos e Devoluções**: Controle empréstimos de itens para usuários
-- **Busca e Listagem Avançada**: Liste e busque itens e usuários cadastrados.
 - **Relatórios e Estatísticas**: Gere relatórios sobre o uso do sistema
 - **Edição de Dados**: Edite informações de itens e usuários.
 - **Exportação/Importação**: Salve e recupere dados do sistema.
