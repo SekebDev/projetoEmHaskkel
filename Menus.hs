@@ -6,6 +6,7 @@ import Users
 import Emprestimos
 import Listagem 
 import Control.Monad.RWS (MonadState(put))
+import Busca
 
 
 
@@ -39,8 +40,8 @@ menu db = do
             novoDb <- menuEmprestimos db
             menu novoDb
         "4" -> do
-            putStrLn "\n-> Indo para o submenu de cadastro..."
-            menu db
+            novoDb <- menuBusca db
+            menu novoDb
         "5" -> do
             putStrLn "\n-> Indo para o submenu de cadastro..."
             menu db
@@ -71,7 +72,13 @@ prompt texto = do
     putStr texto
     getLine
 
-
+-- função auxiliar para converter String em um TipoItem
+obterTipo :: String -> Maybe TipoMidia
+obterTipo entrada = case entrada of
+    "1" -> Just Livro
+    "2" -> Just Filme
+    "3" -> Just Jogo
+    _   -> Nothing
 
 menuUsers :: DB -> IO DB
 menuUsers db = do
@@ -137,30 +144,25 @@ menuItens db = do
             ano <- prompt "Ano de publicacao: "
             cod <- prompt "Codigo unico: "
             
-            putStrLn "Tipo de midia (1-Livro, 2-Filme, 3-Jogo): "
-            tipoStr <- getLine
+            termoTipo <- prompt "Tipo de midia (1-Livro, 2-Filme, 3-Jogo): "
             
-            -- Converte a string do ano para Inteiro
-            let anoInt = read ano :: Int
-            
-            -- converte a string digitada para TipoMidia
-            let tipoEscolhido = case tipoStr of
-                    "1" -> Livro
-                    "2" -> Filme
-                    "3" -> Jogo
-                    _   -> Livro -- assume livro caso invalido
-            
-            -- cria o novo item
-            let novoItem = Item tit aut anoInt cod tipoEscolhido
-            
-            -- cadastra no banco de dados
-            case cadastrarItem novoItem db of
-                Left erro -> do
-                    putStrLn $ "\n" ++ erro
-                    menuItens db -- repete o menu sem alterar
-                Right novoDb -> do
-                    putStrLn "\nItem cadastrado com sucesso!"
-                    menuItens novoDb -- volta com o banco atualizado!
+            case obterTipo termoTipo of
+                Just tipoEscolhido -> do
+                    -- Converte a string do ano para Inteiro (com cuidado)
+                    let anoInt = read ano :: Int
+                    let novoItem = Item tit aut anoInt cod tipoEscolhido
+                    
+                    case cadastrarItem novoItem db of
+                        Left erro -> do
+                            putStrLn $ "\nErro: " ++ erro
+                            menuItens db -- repete o menu sem alterar
+                        Right novoDb -> do
+                            putStrLn "\nItem cadastrado com sucesso!"
+                            menuItens novoDb -- volta com o banco atualizado!
+                
+                Nothing -> do
+                    putStrLn "\nOpção de tipo de mídia inválida! Tente novamente."
+                    menuItens db
         "2" -> do
             cod <- prompt "Codigo do item a ser removido: "
 
@@ -237,4 +239,74 @@ menuEmprestimos db = do
                     menuEmprestimos dbNovo
         "6" -> do
             return db
-                        
+
+-- | Submenu: Busca e Listagem Avançada
+menuBusca :: DB -> IO DB
+menuBusca db = do
+    putStrLn "\n========================="
+    putStrLn " Busca e Listagem Avançada "
+    putStrLn "========================="
+    putStrLn "1 - Buscar por título"
+    putStrLn "2 - Buscar por autor/diretor"
+    putStrLn "3 - Busca combinada (título e autor)"
+    putStrLn "4 - Filtrar por categoria"
+    putStrLn "5 - Ordenar resultados"
+    putStrLn "6 - Voltar ao menu principal"
+    putStr "Escolha uma opção: "
+    
+    opcao <- getLine
+    case opcao of
+        "1" -> do
+            termo <- prompt "Digite o título: "
+            let resultados = buscarPorTitulo termo (itens db)
+            listarItens resultados
+            menuBusca db
+        
+        "2" -> do
+            termo <- prompt "Digite o autor/diretor: "
+            let resultados = buscarPorAutor termo (itens db)
+            listarItens resultados
+            menuBusca db
+        
+        "3" -> do
+            termo1 <- prompt "Digite o titulo: "
+            termo2 <- prompt "Digite autor/diretor: "
+            let resultados = buscaCombinada termo1 termo2 (itens db)
+            listarItens resultados
+            menuBusca db
+        
+        "4" -> do
+            termo <- prompt "Tipo de midia (1-Livro, 2-Filme, 3-Jogo): "
+            case obterTipo termo of
+                Just tipo -> do
+                    let resultados = filtrarPorCategoria tipo (itens db)
+                    listarItens resultados
+                    menuBusca db
+                Nothing -> do
+                    putStrLn "Opção inválida! Tente novamente."
+                    menuBusca db
+            
+
+        "5" -> do
+            c <- prompt "Escolha o critério (1 - Autor, 2 - Titulo, 3 - Ano): "
+            let criterio' = case c of
+                                "1" -> "autor"
+                                "2" -> "titulo"
+                                "3" -> "ano"
+                                _   -> "" -- Usamos vazio para indicar erro
+            
+            if criterio' == "" 
+                then do
+                    putStrLn "Opção inválida! Tente novamente."
+                    menuBusca db
+                else do
+                    o <- prompt "Escolha a ordem (1 - Ascendente, 2 - Descendente): "
+                    let ordem' = if o == "2" then "desc" else "asc"
+                    let resultados = ordenarItens criterio' ordem' (itens db)
+                    listarItens resultados
+                    menuBusca db
+            
+        "6" -> return db
+        _   -> do
+            putStrLn "Opção inválida."
+            menuBusca db
